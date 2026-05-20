@@ -1,0 +1,14 @@
+# 复制此文件为 config.yaml 并填入真实配置
+
+llm:
+  api_key: "your-api-key-here"
+  base_url: "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+  model: "ep-20250122140342-xfg2r"
+  max_tokens: 4096
+  timeout: 120
+
+proxy:
+  enabled: false
+  host: "your-proxy-host:port"
+  username: "your-username"
+  password: "your-password"
