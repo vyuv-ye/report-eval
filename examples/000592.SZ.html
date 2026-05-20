@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>平潭发展深度研报</title>
+    <!-- Optimized CDN links for production use -->
+
+  <!-- Tailwind CSS - 使用轻量级 JIT CDN 版本，配置为只扫描当前页面 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      // 只包含移动端需要的颜色和间距
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+
+  <!-- ECharts - 使用完整版（但可以按需替换为 echarts.simple.min.js） -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+  <!-- Lucide Icons - 固定版本号 -->
+<script src="https://unpkg.com/lucide@0.577.0/dist/umd/lucide.js"></script>
+
+  <!-- Font Awesome - 仅保留用于特殊图标（如 fa-robot, fa-fire） -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+  <style>
+  /* ============================================
+      MOBILE-FIRST DESIGN SYSTEM
+      ============================================ */
+  
+  /* CSS Variables for consistent theming */
+  :root {
+    --color-primary: #3E62ED;
+  
+    /* A-share market colors: red=up/good, green=down/bad */
+    --color-danger: #E46357;  /* Red - used for up/good (A-share convention) */
+    --color-safe: #47CEA1;    /* Green - used for down/bad (A-share convention) */
+    --color-warning: #F5A623;
+  
+    /* Risk indicator colors (independent of A-share red/green) */
+    --color-risk-low: #3b82f6;    /* Blue - low risk */
+    --color-risk-medium: #f59e0b;  /* Amber - medium risk */
+    --color-risk-high: #c2410c;    /* Orange - high risk */
+  
+    --color-slate-50: #f5f5f5f5;
+    --color-slate-100: #f2f2f2;
+    --color-slate-200: #cccccc;
+    --color-slate-400: #999999;
+    --color-slate-700: #333333;
+    --color-slate-800: #222222;
+    --color-slate-900: #000000;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+    --shadow-sm: 0 2px 8px rgba(2, 6, 23, 0.04);
+    --shadow-md: 0 4px 12px rgba(2, 6, 23, 0.06);
+    --shadow-lg: 0 8px 24px rgba(2, 6, 23, 0.08);
+  }
+  
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Roboto,sans-serif;
+    background-color:var(--color-slate-50);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  
+  /* ============================================
+      HEADER WITH ENHANCED VISUALS
+      ============================================ */
+  .header-bg{
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    color:white;
+    border-radius:0 0 24px 24px;
+    position:relative;
+    overflow:hidden;
+    margin: 0 -12px;
+    padding: 24px 16px 48px 16px;
+  }
+  .header-circle{
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,0.08);
+    pointer-events:none;
+  }
+  
+  /* ============================================
+      UNIFIED CARD SYSTEM (ENHANCED)
+      ============================================ */
+  .card{
+    background:#fff;
+    border:1px solid var(--color-slate-100);
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+    box-shadow:var(--shadow-sm);
+    transition: box-shadow 0.2s ease;
+  }
+  .card:active{
+    box-shadow:var(--shadow-md);
+  }
+  .card-header{
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-slate-100);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background: linear-gradient(90deg, rgba(241,245,249,0.6) 0%, rgba(255,255,255,1) 70%);
+  }
+  .card-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+    flex:1;
+  }
+  .card-accent{
+    width:4px;
+    height:18px;
+    border-radius:var(--radius-full);
+    flex:none;
+  }
+  .card-h3{
+    font-weight: 800;
+    color:var(--color-slate-900);
+    font-size: 15px;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+  .card-sub{
+    margin-top:3px;
+    font-size:11px;
+    color:var(--color-slate-400);
+    line-height: 1.4;
+  }
+    .card-badge{
+    font-size:10px;
+    padding:4px 10px;
+    border-radius:var(--radius-full);
+    background:#EBEEFF;
+    color:#3E62ED;
+    font-weight:700;
+    flex:none;
+  }
+  .card-body{
+    padding: 16px;
+  }
+  .card-foot{
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-slate-100);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.6) 100%);
+  }
+  
+  /* ============================================
+      AGENT REFERENCES (TOUCH-OPTIMIZED)
+      ============================================ */
+  .agent-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    min-height: 40px;
+    border-radius:var(--radius-full);
+    border: 1px solid var(--color-slate-200);
+    background:var(--color-slate-50);
+    transition: all 0.15s ease;
+    text-decoration:none;
+  }
+  .agent-pill:hover{
+    background:var(--color-slate-100);
+    border-color:var(--color-slate-200);
+    transform: translateY(-1px);
+  }
+  .agent-pill:active{
+    transform: translateY(0px) scale(0.98);
+    background:var(--color-slate-100);
+  }
+  .agent-avatar{
+    width:20px;height:20px;border-radius:var(--radius-full);
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:900;
+    border:1px solid rgba(0,0,0,0.04);
+    flex:none;
+  }
+  .agent-text{
+    font-size:11px;color:var(--color-slate-700);font-weight:700;
+    white-space:nowrap;
+  }
+  
+  /* History link */
+  .history-link{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:40px;height:40px;
+    min-width: 40px;
+    border-radius:var(--radius-md);
+    border:1px solid var(--color-slate-200);
+    background:#ffffff;
+    color:var(--color-slate-400);
+    transition: all 0.15s ease;
+    text-decoration:none;
+    flex:none;
+  }
+  .history-link:hover{
+    color:var(--color-primary);
+    border-color:var(--color-primary);
+    background:rgba(62, 98, 237, 0.08);
+  }
+  .history-link:active{
+    transform: scale(0.95);
+  }
+  
+  /* Timeline */
+  .timeline-line{
+    position:absolute; left:19px; top:10px; bottom:10px;
+    width:2px; background:#e2e8f0;
+  }
+  
+  /* ============================================
+      KPI COMPONENT (ENHANCED)
+      ============================================ */
+  .kpi{
+    border:1px solid var(--color-slate-100);
+    background:#ffffff;
+    border-radius:var(--radius-md);
+    padding:12px;
+    transition: all 0.15s ease;
+  }
+  .kpi:active{
+    background:#ffffff;
+    border-color:var(--color-slate-200);
+  }
+  .kpi-label{
+    font-size:12px;
+    color:#666666;
+    font-weight:700;
+    letter-spacing: 0.02em;
+    text-transform:uppercase;
+  }
+  .kpi-value{
+    font-size:16px;
+    color:var(--color-slate-900);
+    font-weight:900;
+    margin-top:6px;
+    letter-spacing: -0.02em;
+  }
+  .kpi-hint{
+    font-size:11px;
+    color:var(--color-slate-400);
+    margin-top:4px;
+    line-height:1.4;
+  }
+  
+  /* ============================================
+      CALLOUT COMPONENT
+      ============================================ */
+    .callout{
+    border:1px ;
+    background:linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
+    border-radius:var(--radius-md);
+    padding:14px;
+    position:relative;
+  }
+  .callout-title{
+    font-size:14px;
+    font-weight:900;
+    color:#333333;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:8px;
+    letter-spacing: -0.01em;
+  }
+  .callout-text{
+    font-size:14px;
+    color:#333333;
+    line-height:1.6;
+  }
+  /* ============================================
+      HIGHLIGHT BOX (AHA MOMENT)
+      ============================================ */
+  .highlight-box{
+    border:2px solid var(--color-slate-200);
+    background: linear-gradient(135deg, var(--color-slate-50) 0%, var(--color-slate-100) 100%);
+    border-radius:var(--radius-lg);
+    padding:18px;
+    position:relative;
+    box-shadow:var(--shadow-md);
+  }
+  .highlight-box::before{
+    content:'';
+    position:absolute;
+    top:0;left:0;right:0;height:4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .highlight-box-title{
+    font-size:14px;
+    font-weight:900;
+    color:var(--color-slate-900);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+    letter-spacing: -0.01em;
+  }
+  .highlight-box-content{
+    font-size:12px;
+    color:var(--color-slate-700);
+    line-height:1.65;
+  }
+  
+  /* ============================================
+      CATALYST CARD
+      ============================================ */
+  .catalyst-card{
+    border:1px solid #fcd34d;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-radius:var(--radius-md);
+    padding:16px;
+    position:relative;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+  }
+  .catalyst-card::before{
+    content:'⚡';
+    position:absolute;
+    top:12px;right:12px;
+    font-size:18px;
+    opacity:0.6;
+  }
+  .catalyst-title{
+    font-size:13px;
+    font-weight:900;
+    color:#92400e;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+    letter-spacing: -0.01em;
+  }
+  .catalyst-content{
+    font-size:12px;
+    color:#78350f;
+    line-height:1.6;
+  }
+  
+  /* Divider - 分割线 */
+  .divider{
+    width:100%;
+    height:1px;
+    background: linear-gradient(90deg, transparent 0%, #e2e8f0 50%, transparent 100%);
+  }
+  
+  /* ============================================
+      PROGRESS BAR COMPONENT
+      ============================================ */
+  .progress-wrap{
+    border:1px solid var(--color-slate-100);
+    border-radius:var(--radius-md);
+    background:#ffffff;
+    padding:12px;
+  }
+  .progress-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .progress-label{
+    font-size:11px;
+    color:var(--color-slate-700);
+    font-weight:800;
+    letter-spacing: 0.01em;
+  }
+  .progress-val{
+    font-size:11px;
+    color:var(--color-slate-400);
+    font-weight:800;
+  }
+  .progress-bar{
+    width:100%;
+    height:10px;
+    background:var(--color-slate-100);
+    border-radius:var(--radius-full);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    border-radius:var(--radius-full);
+    transition: width 0.3s ease;
+  }
+  
+  /* ============================================
+      CHIPS / TAGS COMPONENT
+      ============================================ */
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip{
+    font-size:11px;
+    padding:6px 12px;
+    border-radius:var(--radius-full);
+    background:var(--color-slate-50);
+    border:1px solid var(--color-slate-200);
+    color:var(--color-slate-700);
+    font-weight:800;
+    letter-spacing: 0.01em;
+    transition: all 0.15s ease;
+  }
+  .chip:active{
+    transform: scale(0.96);
+  }
+  
+  /* ============================================
+      MINI LIST COMPONENT
+      ============================================ */
+  .mini-list{
+    border:1px solid var(--color-slate-100);
+    background:#ffffff;
+    border-radius:var(--radius-md);
+    padding:12px;
+  }
+  .mini-item{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 0;
+    border-top:1px dashed var(--color-slate-100);
+  }
+  .mini-item:first-child{ border-top:none; padding-top:0; }
+  .mini-item:last-child{ padding-bottom:0; }
+  .mini-icon{
+    width:20px;height:20px;
+    border-radius:var(--radius-sm);
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--color-slate-200);
+    background:var(--color-slate-50);
+    color:var(--color-slate-400);
+    flex:none;
+  }
+  .mini-title{
+    font-size:12px;
+    font-weight:800;
+    color:var(--color-slate-900);
+    letter-spacing: -0.01em;
+  }
+  .mini-desc{
+    font-size:11px;
+    color:var(--color-slate-400);
+    margin-top:3px;
+    line-height:1.5;
+  }
+  
+  /* ============================================
+      RISK TAG COMPONENT
+      ============================================ */
+  .risk-tag{
+    font-size:11px;
+    padding:6px 10px;
+    border-radius:var(--radius-full);
+    border:1px solid var(--color-slate-200);
+    background:var(--color-slate-50);
+    font-weight:900;
+    color:var(--color-slate-900);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .risk-dot{
+    width:10px;height:10px;border-radius:var(--radius-full);
+    background:var(--color-slate-400);
+  }
+  
+  /* Risk indicator utility classes (blue-amber-orange system) */
+  .risk-low{background:var(--color-risk-low);}
+  .risk-low-light{background:#dbeafe;color:#1d4ed8;}
+  .risk-medium{background:var(--color-risk-medium);}
+  .risk-medium-light{background:#fef3c7;color:#b45309;}
+  .risk-high{background:var(--color-risk-high);}
+  .risk-high-light{background:#fed7aa;color:#9a3412;}
+  
+  /* ============================================
+      TOUCH OPTIMIZATION
+      ============================================ */
+  a, button {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Prevent text selection on interactive elements */
+  .agent-pill,
+  .history-link,
+  .chip {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Safe area inset for mobile devices */
+  @supports (padding: env(safe-area-inset-bottom)) {
+    body {
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+
+
+/* NEW UPDATE BADGE - 新增标记 */
+.new-update-badge{
+  font-size:10px;
+  padding:4px 10px;
+  border-radius:var(--radius-full);
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  font-weight:900;
+  display: inline-flex;
+  align-items: center;
+  gap:4px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 4px rgba(251, 191, 36, 0.15);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+.new-update-badge i{
+  font-size:9px;
+}
+@keyframes pulse-glow{
+  0%, 100% {
+    box-shadow: 0 2px 4px rgba(251, 191, 36, 0.15);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+  }
+}
+  </style>
+</head>
+
+<body class="bg-slate-50">
+  <div class="max-w-md mx-auto min-h-screen px-3 space-y-4">
+    <div class="header-bg p-6 pb-12 shadow-lg" style="background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);"> <div class="header-circle w-64 h-64 -top-20 -right-20" style="background: radial-gradient(circle, rgba(71, 206, 161, 0.15) 0%, transparent 70%);"></div> <div class="header-circle w-44 h-44 top-16 -left-14" style="background: radial-gradient(circle, rgba(228, 99, 87, 0.08) 0%, transparent 70%);"></div> <div class="relative z-10"> <div class="flex items-center gap-2 text-slate-300 text-[11px] font-mono mb-3 uppercase tracking-wider"><span class="bg-white/10 px-2 py-0.5 rounded border border-white/10">000592.SZ</span><span>深度策略复盘</span><span>•</span><span>2026-05-20</span></div> <div class="flex items-center gap-3 mb-2"> <h1 class="text-3xl font-black tracking-tight text-white">平潭发展</h1><span class="px-2.5 py-1 text-[10px] font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">中性观望</span> </div> <p class="text-slate-200 text-sm leading-relaxed max-w-[92%] font-medium">营收下滑-18.23%、归母净利润-180.81万元，股价却在布林下轨10.06死撑。更吓人的是，<span class="font-extrabold">主力资金两天净流出-1.21亿-3.14亿</span>——这已经不是分歧，是溃逃。泡沫靠什么支撑？答案是：<span class="text-orange-300 font-extrabold">情绪与基本面的极致撕裂</span>。</p> <div class="chips mt-4"><span class="chip bg-black/20 border-white/10 text-blue-50"><i class="fas fa-triangle-exclamation mr-1"></i>泡沫估值</span><span class="chip bg-black/20 border-white/10 text-blue-50"><i class="fas fa-arrow-down mr-1"></i>主力出逃</span><span class="chip bg-black/20 border-white/10 text-blue-50"><i class="fas fa-skull-crossbones mr-1"></i>技术破位</span><span class="chip bg-black/20 border-white/10 text-blue-50"><i class="fas fa-gavel mr-1"></i>治理风险</span></div> </div> </div>
+    <div class="card"> <div class="card-header"> <div class="card-title"> <div class="card-accent" style="background:#ef4444"></div> <div class="min-w-0"> <div class="card-h3">资产画像：基本面烂到什么程度？</div> <div class="card-sub">用五维雷达图快速定位病灶</div> </div> </div><span class="card-badge" style="color:#dc2626;background:#fee2e2;">高危预警</span> </div> <div class="card-body"> <div class="mb-4"> <div class="text-base font-extrabold text-slate-700 mb-2">📊 财务健康雷达图</div> <div id="ec_financial_radar_abc123" class="h-44"></div> </div> <div class="grid grid-cols-2 gap-3 mb-4"> <div class="border border-slate-200 rounded-xl p-3"> <div class="text-sm font-extrabold text-slate-700 mb-2"><i data-lucide="trending-down" class="w-4 h-4 text-emerald-500 inline mr-1"></i> 盈利垫底</div> <div class="text-[12px] text-slate-600 leading-relaxed mb-1">• 盈利分位 99.17%（全市场后99.17%）</div> <div class="text-[12px] text-slate-600 leading-relaxed">• Q1归母净利润-180.81万元，同比-141.80%</div> </div> <div class="border border-slate-200 rounded-xl p-3"> <div class="text-sm font-extrabold text-slate-700 mb-2"><i data-lucide="layers" class="w-4 h-4 text-orange-500 inline mr-1"></i> 估值泡沫</div> <div class="text-[12px] text-slate-600 leading-relaxed mb-1">• PB 11.30倍，历史分位90.03%</div> <div class="text-[12px] text-slate-600 leading-relaxed">• PS 15.82倍，历史分位91.41%</div> </div> </div> <div class="callout"> <div class="callout-title"><i class="fas fa-arrow-right"></i>画像总结</div> <div class="callout-text">这是一家<span class="font-extrabold text-red-500">盈利极差（全市场倒数）、增长停滞（成长分位51.03%）、但估值却在天上</span>的公司。基本面与估值的背离程度，在A股里都算“奇葩”。这背后，全靠概念炒作和<span class="font-extrabold text-orange-500">散户情绪</span>在支撑。</div> </div> </div> <div class="card-foot"><div class="agent-group"><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4554839" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">杜才鲍</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4780723" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">古智迪</span>
+                        </a></div></div></div>
+    <div class="card"> <div class="card-header"> <div class="card-title"> <div class="card-accent" style="background:#3b82f6"></div> <div class="min-w-0"> <div class="card-h3">总览：泡沫、溃逃与破位</div> <div class="card-sub">为什么烂公司还能炒这么高？</div> </div> </div><span class="card-badge" style="color:#3E62ED;background:#EBEEFF;">核心矛盾</span> </div> <div class="card-body"> <div class="grid grid-cols-3 gap-2 mb-4"> <div class="kpi"> <div class="kpi-label">最新价</div> <div class="kpi-value">10.40元 元</div> <div class="kpi-hint">日内 0.29%</div> </div> <div class="kpi"> <div class="kpi-label">估值泡沫</div> <div class="kpi-value text-red-600">PB 11.30x</div> <div class="kpi-hint">历史分位90.03%</div> </div> <div class="kpi"> <div class="kpi-label">主力态度</div> <div class="kpi-value text-emerald-600">-1.21亿 亿</div> <div class="kpi-hint">昨-3.14亿</div> </div> <div class="kpi"> <div class="kpi-label">Q1盈利</div> <div class="kpi-value text-emerald-600">-180.81万元</div> <div class="kpi-hint">同比-141.80%</div> </div> <div class="kpi"> <div class="kpi-label">技术破位</div> <div class="kpi-value text-orange-600">破MA5</div> <div class="kpi-hint">距MA5 11.00元 -0.29%</div> </div> <div class="kpi"> <div class="kpi-label">市场地位</div> <div class="kpi-value text-slate-600">市值分位20.35%</div> <div class="kpi-hint">大市值，低流动性</div> </div> </div> <div class="grid grid-cols-2 gap-3 mb-4"> <div class="border border-emerald-200 rounded-xl p-3 bg-gradient-to-br from-emerald-50 to-white"> <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-down" class="w-4 h-4 text-emerald-500"></i><span class="text-sm font-extrabold text-emerald-500">市场恐惧什么</span></div> <div class="text-[12px] leading-relaxed mb-1"><span class="font-extrabold text-emerald-500">① 主力溃逃：</span>两天主力净流出-1.21亿-3.14亿，超大单带头跑。</div> <div class="text-[12px] leading-relaxed mb-1"><span class="font-extrabold text-emerald-500">② 技术破位：</span>股价跌破5日线11.00元，MA5/10/20空头排列，MACD死叉。</div> <div class="text-[12px] leading-relaxed"><span class="font-extrabold text-emerald-500">③ 估值崩塌风险：</span>PB 11.30x（历史90.03%分位），一旦情绪退潮，杀估值空间巨大。</div> </div> <div class="border border-red-200 rounded-xl p-3 bg-gradient-to-br from-red-50 to-white"> <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-up" class="w-4 h-4 text-red-500"></i><span class="text-sm font-extrabold text-red-500">市场在赌什么</span></div> <div class="text-[12px] leading-relaxed mb-1"><span class="font-extrabold text-red-500">① 游资接盘/搏反弹：</span>技术超跌（KDJ -11.78），可能有短线资金博技术性反弹。</div> <div class="text-[12px] leading-relaxed mb-1"><span class="font-extrabold text-red-500">② 概念炒作未死：</span>平潭区位、旅游业务等概念仍有零星热度，吸引散户跟风。</div> <div class="text-[12px] leading-relaxed"><span class="font-extrabold text-red-500">③ “死猫跳”预期：</span>历史经验，极端超跌后常有反抽，但通常是逃命机会。</div> </div> </div> <div class="callout"> <div class="callout-title"><i class="fas fa-chart-bar"></i>数据告诉我们什么</div> <div class="callout-text">这完全是一场<span class="font-extrabold">“基本面定价”与“情绪/概念定价”的战争</span>。主力（聪明钱）用脚投票，而散户和游资还在赌桌上的最后一枚筹码。关键问题是：<span class="font-extrabold text-orange-500">这场基于情绪的击鼓传花，鼓声何时会停？</span></div> </div> </div> <div class="card-foot"><div class="agent-group"><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4824095" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">晴宇彪</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4829428" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">宁哥</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4780723" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">古智迪</span>
+                        </a></div></div></div>
+    <div class="card"> <div class="card-header"> <div class="card-title"> <div class="card-accent" style="background:#f59e0b"></div> <div class="min-w-0"> <div class="card-h3">深度分析：泡沫为什么能撑住？</div> <div class="card-sub">拆解“皇帝的新衣”是怎么织的</div> </div> </div><span class="card-badge" style="color:#3E62ED;background:#EBEEFF;">因果链</span> </div> <div class="card-body"> <div class="callout mb-4"> <div class="callout-title"><i class="fas fa-lightbulb text-orange-400"></i>核心结论</div> <div class="callout-text">泡沫的支撑来自<span class="font-extrabold text-red-500">散户/游资接盘</span>与<span class="font-extrabold text-orange-500">技术性超跌</span>的博弈，但<span class="font-extrabold">主力撤退</span>和<span class="font-extrabold">基本面坍塌</span>已为破裂埋下伏笔。这不是价值投资，是<span class="font-extrabold text-emerald-500">刀口舔血</span>的游戏。</div> </div> <div class="mb-4"> <div class="mb-2 text-base font-extrabold text-slate-700">因为 资金结构已经恶化</div> <div class="mini-list"> <div class="mini-item"> <div class="mini-icon" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;"><i data-lucide="users" class="w-4 h-4"></i></div> <div> <div class="mini-title">主力跑了，散户接了</div> <div class="mini-desc">5月18-19日，主力净流出合计约4.35亿，但全市场资金净流出-5885.17万-3.86亿。差额谁来填？大概率是<span class="font-extrabold text-red-500">散户和游资</span>在接盘。</div> </div> </div> <div class="mini-item"> <div class="mini-icon" style="background:#eff6ff;border-color:#bfdbfe;color:#2563eb;"><i data-lucide="bar-chart" class="w-4 h-4"></i></div> <div> <div class="mini-title">技术面进入“超跌陷阱”</div> <div class="mini-desc">KDJ -11.78（深度超卖），RSI(6) 30.04（接近超卖）。历史上看，这种位置<span class="font-extrabold">容易诱发短线技术性反弹</span>，吸引抄底资金。</div> </div> </div> <div class="mini-item"> <div class="mini-icon" style="background:#f0fdf4;border-color:#86efac;color:#16a34a;"><i data-lucide="zap" class="w-4 h-4"></i></div> <div> <div class="mini-title">概念余温未散</div> <div class="mini-desc">尽管有治理风险（蹭热点被查），但平潭区位、旅游等<span class="font-extrabold">朦胧概念</span>仍在部分炒股群流传，为情绪炒作提供“故事”。</div> </div> </div> </div> </div> <div class="mb-4"> <div class="mb-2 text-base font-extrabold text-slate-700">所以 短期或有弱反弹，但趋势已坏</div> <div class="grid grid-cols-3 gap-2"> <div class="border border-slate-200 rounded-xl p-3 text-center"> <div class="text-[12px] text-slate-400 mb-1">反弹催化剂</div> <div class="text-lg font-extrabold text-orange-500">技术超跌</div> <div class="text-[12px] text-slate-500">KDJ -11.78</div> </div> <div class="border border-slate-200 rounded-xl p-3 text-center"> <div class="text-[12px] text-slate-400 mb-1">反弹阻力</div> <div class="text-lg font-extrabold text-emerald-500">11.00元</div> <div class="text-[12px] text-slate-500">5日均线压力</div> </div> <div class="border border-slate-200 rounded-xl p-3 text-center"> <div class="text-[12px] text-slate-400 mb-1">泡沫破裂风险</div> <div class="text-lg font-extrabold text-red-500">高</div> <div class="text-[12px] text-slate-500">主力撤退+基本面差</div> </div> </div> </div> <div class="mb-4"> <div class="mb-2 text-base font-extrabold text-slate-700">导致 操作上只可观望，不可恋战</div> <div class="text-sm leading-relaxed text-slate-700">任何基于技术超跌的反弹，在主力溃逃和基本面恶化的背景下，<span class="font-extrabold text-red-500">都是“逃命波”而非“主升浪”</span>。参与难度极大，盈亏比极低。一旦反弹无力（如无法站上5日线11.00元），可能开启新一轮下跌。</div> </div> <div class="border border-slate-200 p-4 mb-4 bg-white rounded-xl"> <div class="flex items-center gap-2 mb-3"><i data-lucide="alert-triangle" class="w-4 h-4 text-orange-500"></i><span class="font-extrabold">关键风险提示</span></div> <div class="progress-wrap mb-3"> <div class="progress-label">估值崩塌风险<span class="ml-auto text-[11px] font-bold px-2 py-0.5 bg-orange-100 text-orange-800 rounded">高风险</span></div> <div class="progress-bar"><div class="progress-fill bg-orange-500" style="width: 85%"></div></div> <div class="progress-hint">PB 11.30x（历史90.03%分位），无业绩支撑，一旦情绪逆转，下跌空间大。</div> </div> <div class="progress-wrap mb-3"> <div class="progress-label">流动性踩踏风险<span class="ml-auto text-[11px] font-bold px-2 py-0.5 bg-orange-100 text-orange-800 rounded">高风险</span></div> <div class="progress-bar"><div class="progress-fill bg-orange-500" style="width: 75%"></div></div> <div class="progress-hint">“大市值，低流动性”组合，一旦恐慌盘涌出，可能因卖盘堵塞而产生<span class="font-extrabold">非理性急跌</span>。</div> </div> <div class="progress-wrap"> <div class="progress-label">治理与政策风险<span class="ml-auto text-[11px] font-bold px-2 py-0.5 bg-amber-100 text-amber-800 rounded">中风险</span></div> <div class="progress-bar"><div class="progress-fill bg-amber-500" style="width: 60%"></div></div> <div class="progress-hint">曾有蹭热点被交易所核查记录，信息披露不透明，存在“黑天鹅”隐患。</div> </div> </div> <div class="callout"> <div class="callout-title"><i class="fas fa-arrow-right"></i>接下来看什么？</div> <div class="callout-text">理解了泡沫的构成，接下来需要看清<span class="font-extrabold">市场的真实博弈力量</span>——谁在买，谁在卖，他们各自的逻辑是什么？</div> </div> </div> <div class="card-foot"><div class="agent-group"><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4836713" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">毛哥</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4824092" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">肖特</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4802897" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">月姐</span>
+                        </a></div></div></div>
+    <div class="card"> <div class="card-header"> <div class="card-title"> <div class="card-accent" style="background:#8b5cf6"></div> <div class="min-w-0"> <div class="card-h3">多空博弈：谁在买？谁在卖？</div> <div class="card-sub">拆解交易对手盘</div> </div> </div><span class="card-badge" style="color:#7c3aed;background:#ede9fe;">博弈分析</span> </div> <div class="card-body"> <div class="grid grid-cols-2 divide-x divide-slate-200 mb-4"> <div class="pr-3"> <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-up" class="w-4 h-4 text-red-500"></i><span class="text-sm font-extrabold text-red-500">多方（买入逻辑）</span></div> <div class="text-[12px] text-slate-700 leading-relaxed mb-2"><span class="font-extrabold text-red-500">主体：</span>散户、短线游资、技术派抄底资金</div> <div class="text-[12px] text-slate-700 leading-relaxed mb-1"><span class="font-extrabold">① 博超跌反弹：</span>KDJ -11.78，RSI低位，认为技术面有修复需求。</div> <div class="text-[12px] text-slate-700 leading-relaxed mb-1"><span class="font-extrabold">② 赌概念续命：</span>相信平潭区位、旅游等概念还能吸引跟风盘。</div> <div class="text-[12px] text-slate-700 leading-relaxed"><span class="font-extrabold">③ “死猫跳”预期：</span>认为暴跌后必有反抽，快进快出做差价。</div> <div class="mt-2 text-[11px] px-2 py-1 bg-red-100 text-red-600 rounded font-bold">逻辑弱点：忽视基本面，博弈成分大，一旦反弹无力极易多杀多。</div> </div> <div class="pl-3"> <div class="flex items-center gap-2 mb-2"><i data-lucide="trending-down" class="w-4 h-4 text-emerald-500"></i><span class="text-sm font-extrabold text-emerald-500">空方（卖出逻辑）</span></div> <div class="text-[12px] text-slate-700 leading-relaxed mb-2"><span class="font-extrabold text-emerald-500">主体：</span>主力机构、大资金、价值投资者</div> <div class="text-[12px] text-slate-700 leading-relaxed mb-1"><span class="font-extrabold">① 基本面无法支撑估值：</span>Q1归母净利润-180.81万元，PB却高达11.30x，性价比为负。</div> <div class="text-[12px] text-slate-700 leading-relaxed mb-1"><span class="font-extrabold">② 趋势破位，止损离场：</span>股价跌破关键均线，技术面走坏，触发纪律性卖出。</div> <div class="text-[12px] text-slate-700 leading-relaxed"><span class="font-extrabold">③ 规避不确定性：</span>公司治理有瑕疵，叠加市场整体高估（全市场ERP -1.85%），选择避险。</div> <div class="mt-2 text-[11px] px-2 py-1 bg-emerald-100 text-emerald-600 rounded font-bold">逻辑弱点：可能错失短期技术反弹，但规避了长期估值回归的主要风险。</div> </div> </div> <div class="border border-blue-50 rounded-xl p-3 mb-4 bg-gradient-to-r from-blue-50 to-white"> <div class="flex items-center gap-2 mb-2"><i data-lucide="scales" class="w-4 h-4 text-blue-500"></i><span class="text-sm font-bold">当前时点，哪方占优？</span></div> <div class="text-sm leading-relaxed"><span class="font-extrabold text-blue-500">空方占优，但多方有短期扰动。</span> 主力资金持续流出是<span class="font-extrabold">铁一般的事实</span>，决定了中长期下行趋势。多方力量（游资、散户）虽然可能制造<span class="font-extrabold text-orange-500">短暂的、脆弱的反弹</span>，但无法改变“基本面差+估值高”的核心矛盾。这场博弈，<span class="font-extrabold">大概率以泡沫破裂收场</span>。</div> </div> <div class="callout"> <div class="callout-title"><i class="fas fa-arrow-right"></i>博弈的终点</div> <div class="callout-text">看清了多空逻辑，就明白当前<span class="font-extrabold">任何上涨都可能是诱多陷阱</span>。接下来的关键，是结合技术图表，判断<span class="font-extrabold">这个陷阱何时会触发</span>。</div> </div> </div> <div class="card-foot"><div class="agent-group"><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4824095" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">晴宇彪</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4836713" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">毛哥</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4802897" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">月姐</span>
+                        </a></div></div></div>
+    <div class="card"> <div class="card-header"> <div class="card-title"> <div class="card-accent" style="background:#f59e0b"></div> <div class="min-w-0"> <div class="card-h3">技术面：溃逃与挣扎的图谱</div> <div class="card-sub">看图说话，主力怎么跑的</div> </div> </div><span class="card-badge" style="color:#3E62ED;background:#EBEEFF;">实时数据</span> </div> <div class="card-body"> <div class="grid grid-cols-1 gap-4 mb-4"> <div id="ec_price_ma_abc123" class="h-40"></div> <div id="ec_capital_flow_abc123" class="h-40"></div> </div> <div class="grid grid-cols-3 gap-2 mb-4"> <div class="kpi"> <div class="kpi-label">KDJ</div> <div class="kpi-value text-orange-600">-11.78</div> <div class="kpi-hint">深度超卖</div> </div> <div class="kpi"> <div class="kpi-label">MACD</div> <div class="kpi-value text-emerald-600">死叉</div> <div class="kpi-hint">柱状线-0.16</div> </div> <div class="kpi"> <div class="kpi-label">主力态度</div> <div class="kpi-value text-emerald-600">-1.21亿</div> <div class="kpi-hint">连续2日流出</div> </div> </div> <div class="callout"> <div class="callout-title"><i class="fas fa-arrow-right"></i>技术洞察</div> <div class="callout-text">图表清晰展示了<span class="font-extrabold text-emerald-500">“放量下跌”</span>到<span class="font-extrabold text-orange-500">“缩量阴跌”</span>的过程：5月14-15日放量大跌（主力出逃），随后缩量在布林下轨10.06附近挣扎。KDJ深度超卖预示<span class="font-extrabold">短期可能有弱反弹</span>，但<span class="font-extrabold">上方11.00元（5日线）构成强阻力</span>。若反弹无法带量突破该位置，则视为<span class="font-extrabold text-red-500">下跌中继</span>。</div> </div> </div> <div class="card-foot"><div class="agent-group"><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4829428" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">宁哥</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4743347" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">思庄</span>
+                        </a></div></div></div>
+    <div class="card"> <div class="card-header"> <div class="card-title"> <div class="card-accent" style="background:#6366f1"></div> <div class="min-w-0"> <div class="card-h3">投资判断：短期观望，等待泡沫破裂</div> <div class="card-sub">回答Header：泡沫撑不久，别当接盘侠</div> </div> </div><span class="card-badge" style="background:#f1f5f9;color:#475569;border-color:#cbd5e1;">中性观望</span> </div> <div class="card-body"> <div class="grid grid-cols-2 gap-3 mb-4"> <div class="border border-orange-200 rounded-xl p-3 bg-gradient-to-br from-orange-50 to-white"> <div class="flex items-center gap-2 mb-2"><i data-lucide="alert-circle" class="w-4 h-4 text-orange-500"></i><span class="text-sm font-extrabold text-orange-500">短期（5日内）：极度谨慎</span></div> <div class="text-[12px] text-slate-700 leading-relaxed mb-1"><span class="font-extrabold text-orange-500">可能走势：</span>技术超跌（KDJ -11.78）可能引发弱反弹，<span class="font-extrabold">目标11.00元附近</span>。</div> <div class="text-[12px] text-slate-700 leading-relaxed mb-2"><span class="font-extrabold text-red-500">核心风险：</span>反弹无量或无法突破11.00元，将确认下跌中继，随时可能再次破位下跌。</div> <div class="flex flex-wrap gap-1"><span class="text-[12px] px-2 py-1 bg-amber-100 text-amber-700 rounded-full font-bold">建议：有仓位的，反弹是逃命机会</span><span class="text-[12px] px-2 py-1 bg-slate-100 text-slate-600 rounded-full font-bold">无仓位，坚决不追</span></div> </div> <div class="border border-slate-200 rounded-xl p-3 bg-gradient-to-br from-slate-50 to-white"> <div class="flex items-center gap-2 mb-2"><i data-lucide="clock" class="w-4 h-4 text-slate-500"></i><span class="text-sm font-extrabold text-slate-500">长期（6个月+）：等待低位</span></div> <div class="text-[12px] text-slate-700 leading-relaxed mb-1"><span class="font-extrabold text-emerald-500">下跌支撑位：</span>关注布林下轨10.06及心理关口10.03元，若跌破可能引发加速。</div> <div class="text-[12px] text-slate-700 leading-relaxed mb-2"><span class="font-extrabold">潜在介入时机：</span>绝非现在。需等待<span class="font-extrabold text-blue-500">①估值大幅回落（PB回归合理） ②业绩出现改善迹象 ③市场情绪极度悲观</span>等多重信号。</div> <div class="flex flex-wrap gap-1"><span class="text-[12px] px-2 py-1 bg-blue-100 text-blue-600 rounded-full font-bold">目标：等待10.03元以下</span><span class="text-[12px] px-2 py-1 bg-slate-100 text-slate-600 rounded-full font-bold">持有：6-12月</span></div> </div> </div> <div class="border border-slate-200 rounded-xl p-3 mb-4"> <div class="text-sm font-extrabold text-slate-700 mb-2"><i data-lucide="shield-alert" class="w-4 h-4 inline mr-1"></i> A股看跌结论规范提示</div> <div class="text-[12px] text-slate-600 leading-relaxed">根据A股市场规则，本报告禁止任何“做空”、“卖空”策略。“看跌”结论仅用于提示持有者风险，并分析潜在的、未来可能出现的低位布局时机。当前建议是<span class="font-extrabold">“卖出”或“观望”</span>，绝非“做空”。</div> </div> <div class="highlight-box"> <div class="highlight-title"><i class="fas fa-bullhorn"></i>一句话操作建议</div> <div class="highlight-text"><span class="font-extrabold text-red-500">手里有仓位的，抓住任何反弹至11.00元附近的机会减仓或离场。</span> 想抄底的，<span class="font-extrabold text-blue-500">管住手，这泡沫大概率要破，等它破透了再说。</span> 记住，主力已经跑了-1.21亿-3.14亿，别当最后的买单者。</div> </div> </div> <div class="card-foot"><div class="agent-group"><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4824095" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">晴宇彪</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4829428" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">宁哥</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4836713" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">毛哥</span>
+                        </a><a class="agent-pill" href="https://m.zhicepilot.com/jump?target=/report/clue/4554839" target="_blank" rel="noopener" style="background:#EBEFFD;border-color:#EBEFFD;">
+                                <span class="agent-text" style="color:#3E62ED;">杜才鲍</span>
+                        </a></div></div></div>
+  </div>
+
+  <script>
+    // 初始化 Lucide Icons
+    lucide.createIcons();
+
+    try {
+      (function(){var el=document.getElementById('ec_price_ma_abc123');if(!el||typeof echarts==='undefined')return;var chart=echarts.init(el);var d={"ma5": [10.8, 10.91, 11.02, 11.26, 11.51, 11.79, 11.75, 11.61, 11.32, 11.0], "close": [10.91, 11.34, 11.44, 11.86, 11.98, 12.34, 11.13, 10.75, 10.4, 10.37], "ma20": [11.24, 11.22, 11.19, 11.17, 11.17, 11.21, 11.19, 11.16, 11.11, 11.07], "dates": ["20260506", "20260507", "20260508", "20260511", "20260512", "20260513", "20260514", "20260515", "20260518", "20260519"], "_units": {}};chart.setOption({tooltip:{trigger:'axis',backgroundColor:'rgba(0,0,0,0.8)',textStyle:{color:'#fff'}},legend:{top:0,data:['收盘价','MA5','MA20'],textStyle:{fontSize:9},icon:'rect',itemWidth:12,itemHeight:3},grid:{top:25,bottom:18,left:35,right:10},xAxis:{type:'category',data:d.dates,axisLabel:{fontSize:9}},yAxis:{type:'value',scale:true,axisLabel:{fontSize:8}},series:[{name:'收盘价',type:'line',data:d.close,smooth:true,lineStyle:{width:2,color:'#E46357'},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(228,99,87,0.3)'},{offset:1,color:'rgba(228,99,87,0.01)'}]}}},{name:'MA5',type:'line',data:d.ma5,smooth:true,lineStyle:{width:1,color:'#F59E0B'}},{name:'MA20',type:'line',data:d.ma20,smooth:true,lineStyle:{width:1,color:'#3B82F6'}}]});el.echartsInstance=chart;})()
+    } catch(e) {
+      console.error('ECharts初始化错误 (ID: ec_price_ma_abc123):', e);
+    }
+
+
+    try {
+      (function(){var el=document.getElementById('ec_capital_flow_abc123');if(!el||typeof echarts==='undefined')return;var chart=echarts.init(el);var d={"buy_elg_amount": [0.85, 3.51, 0.92, 1.45, 0.5, 0.8, -3.13, -0.49, -2.38, -0.58], "zl_net_amount": [0.45, 3.69, 0.63, 1.46, -0.19, 0.92, -7.2, -2.33, -3.14, -1.21], "dates": ["20260506", "20260507", "20260508", "20260511", "20260512", "20260513", "20260514", "20260515", "20260518", "20260519"], "_units": {"buy_elg_amount": "亿元", "zl_net_amount": "亿元"}};chart.setOption({tooltip:{trigger:'axis',backgroundColor:'rgba(0,0,0,0.8)',borderColor:'#47CEA1',textStyle:{color:'#fff'}},legend:{top:0,data:['主力净流入','特大单净流入'],textStyle:{fontSize:9}},grid:{top:25,bottom:18,left:35,right:10},xAxis:{type:'category',data:d.dates,axisLine:{show:false},axisTick:{show:false},axisLabel:{fontSize:9}},yAxis:{type:'value',axisLabel:{fontSize:8}},series:[{name:'主力净流入',type:'bar',data:d.zl_net_amount,barWidth:'40%',itemStyle:{color:function(params){return params.value>=0?'#E46357':'#47CEA1';}}},{name:'特大单净流入',type:'bar',data:d.buy_elg_amount,barWidth:'40%',itemStyle:{color:function(params){return params.value>=0?'#E46357':'#47CEA1';}}}]});chart.setOption({tooltip:{formatter:function(params){var _su={"主力净流入": "亿元", "特大单净流入": "亿元"};var res=params[0].name+'<br/>';params.forEach(function(p){var unit=_su[p.seriesName]?(' '+_su[p.seriesName]):'';var v=(p.value==null)?'-':Number(p.value).toFixed(2);res+=p.marker+' '+p.seriesName+': '+v+unit+'<br/>';});return res;}}});el.echartsInstance=chart;})()
+    } catch(e) {
+      console.error('ECharts初始化错误 (ID: ec_capital_flow_abc123):', e);
+    }
+
+
+    try {
+      (function(){var el=document.getElementById('ec_financial_radar_abc123');if(!el||typeof echarts==='undefined')return;var chart=echarts.init(el);chart.setOption({tooltip:{},radar:{indicator:[{name:'盈利能力',max:100},{name:'成长性',max:100},{name:'偿债能力',max:100},{name:'运营效率',max:100},{name:'现金流',max:100}],shape:'circle',axisName:{color:'#666',fontSize:10}},series:[{name:'财务健康度',type:'radar',data:[{value:[(100-99.17), 51.03, (100-43.52), 0.08*100, Math.max(0, ((-28432370.66/10000)+3)/6*100)],name:'平潭发展',itemStyle:{color:'#E46357'},areaStyle:{color:'rgba(228, 99, 87, 0.2)'}}]}],legend:{show:false}});el.echartsInstance=chart;})()
+    } catch(e) {
+      console.error('ECharts初始化错误 (ID: ec_financial_radar_abc123):', e);
+    }
+
+    // 响应式调整所有图表大小
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('[id^="ec_"]').forEach(el => {
+        const chart = el.echartsInstance;
+        if (chart) chart.resize();
+      });
+    });
+
+  </script>
+</body>
+</html>
