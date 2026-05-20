@@ -265,6 +265,104 @@ def _parse_report_json_to_text(json_str: str) -> str:
         return json_str
 
 
+def parse_html_to_text(html_str: str) -> str:
+    """将研报 HTML 文件内容转为纯文本。"""
+    return _strip_html(html_str)
+
+
+def extract_meta_from_html(html_str: str, filename: str = '') -> dict:
+    """从 HTML 文件中提取 meta 信息（asset_code, asset_name, report_date）。"""
+    meta = {}
+
+    # 从文件名提取 asset_code，如 600519.SH.html -> 600519.SH
+    if filename:
+        basename = re.sub(r'\.html?$', '', filename, flags=re.I)
+        if re.match(r'^\d{6}\.[A-Z]{2}$', basename):
+            meta['asset_code'] = basename
+
+    # 从 <title> 提取 asset_name
+    m = re.search(r'<title>\s*(.+?)(?:深度研报|研报|报告)?\s*</title>', html_str, re.I)
+    if m:
+        meta['asset_name'] = m.group(1).strip()
+
+    # 尝试从内容中提取 report_date
+    text = _strip_html(html_str[:5000])
+    date_match = re.search(r'(\d{4}[-/]\d{1,2}[-/]\d{1,2})', text)
+    if date_match:
+        meta['report_date'] = date_match.group(1).replace('/', '-')
+
+    return meta
+
+
+def extract_fields_from_html(html_str: str, meta: dict = None) -> dict:
+    """从研报 HTML 直接用正则提取结构化字段（对应 extract_fields_from_report_json）。"""
+    full_text = _strip_html(html_str)
+    meta = meta or {}
+
+    fields = {
+        'asset_code': meta.get('asset_code'),
+        'asset_name': meta.get('asset_name'),
+        'report_date': meta.get('report_date'),
+    }
+
+    current_price = _first_match([
+        rf'最新价\s*/?\s*涨跌幅\s*({_NUMBER})\s*元?',
+        rf'最新价[微下上]?调?至?\s*({_NUMBER})\s*元?',
+        rf'股价(?:微涨至|反弹至|已突破原区间上探至)?\s*({_NUMBER})\s*元',
+        rf'当前\s*({_NUMBER})',
+    ], full_text)
+    if current_price:
+        fields['current_price'] = _safe_float(current_price)
+
+    target_price = _last_match([
+        rf'目标价\s*(?:从{_NUMBER}元(?:下调|上调)?至)?\s*({_NUMBER})\s*元',
+        rf'目标价\s*<[^>]+>\s*({_NUMBER})\s*元',
+    ], full_text) or _last_match([rf'目标价[^0-9]*?({_NUMBER})\s*元'], full_text)
+    if target_price:
+        fields['target_price'] = _safe_float(target_price)
+
+    stop_loss = _last_match([
+        rf'止损价(?:从{_NUMBER}元收紧至|上移至)?\s*({_NUMBER})\s*元',
+        rf'止损\s*({_NUMBER})\s*元',
+    ], full_text) or _last_match([rf'止损[价位]?[^0-9]*?({_NUMBER})\s*元'], full_text)
+    if stop_loss:
+        fields['stop_loss_price'] = _safe_float(stop_loss)
+
+    upside = _first_match([rf'(?:潜在收益|潜在涨幅|上涨空间)[^0-9+-]*?\+?\s*({_NUMBER})\s*%'], full_text)
+    if upside:
+        fields['upside_pct'] = _pct_to_number(upside)
+
+    downside = _first_match([rf'(?:潜在风险|潜在跌幅|回撤幅度|最大回撤)[^0-9-]*?-?\s*({_NUMBER})\s*%'], full_text)
+    if downside:
+        fields['downside_pct'] = _pct_to_number(downside)
+
+    risk_reward = _first_match([rf'风险收益比[^0-9]*?({_NUMBER})\s*[：:]\s*1?'], full_text)
+    if risk_reward:
+        fields['risk_reward_ratio'] = _safe_float(risk_reward)
+
+    header_ratings = re.findall(r'(强烈看涨|积极看涨|中性观望|谨慎看跌|强烈推荐|推荐|买入|减仓|观望)', full_text[:600])
+    if header_ratings:
+        fields['header_rating'] = header_ratings[0]
+
+    final_ratings = re.findall(r'(强烈看涨|积极看涨|中性观望|谨慎看跌|强烈推荐|推荐|买入|减仓|观望)', full_text)
+    if final_ratings:
+        fields['final_rating'] = final_ratings[-1]
+
+    m = re.search(rf'PE[-(（]?TTM[)）]?\s*({_NUMBER})', full_text)
+    if m:
+        fields['pe_ttm'] = _safe_float(m.group(1))
+
+    m = re.search(rf'PB\s*({_NUMBER})\s*倍?', full_text)
+    if m:
+        fields['pb'] = _safe_float(m.group(1))
+
+    m = re.search(rf'股息率\s*({_NUMBER})\s*%', full_text)
+    if m:
+        fields['dividend_yield'] = _safe_float(m.group(1))
+
+    return fields
+
+
 def _call_llm(system_prompt: str, user_query: str, max_tokens: int = 4096) -> Optional[str]:
     client = get_llm_client()
     return client.chat(system_prompt, user_query, max_tokens=max_tokens)

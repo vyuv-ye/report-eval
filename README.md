@@ -14,7 +14,7 @@
 ### 安装
 
 ```bash
-git clone https://github.com/your-org/report-eval.git
+git clone https://github.com/vyuv-ye/report-eval.git
 cd report-eval
 pip install -r requirements.txt
 ```
@@ -57,46 +57,23 @@ export PROXY_PASSWORD="pass"
 ### 使用
 
 ```bash
-# 基本用法：检测本地研报 JSON 文件
-python -m report_eval report.json
+# 基本用法：检测本地 examples 目录中的研报 HTML 文件
+python -m report_eval examples/600519.SH.html
 
 # 仅数据对比（跳过 LLM 评测，速度更快）
-python -m report_eval report.json --data-only
+python -m report_eval examples/600519.SH.html --data-only
 
 # 全量对比（含公式复算 + LLM 计算验证）
-python -m report_eval report.json --all-check
+python -m report_eval examples/600519.SH.html --all-check
 
 # 指定输出目录
-python -m report_eval report.json -o ./my_output
+python -m report_eval examples/600519.SH.html -o ./my_output
 
 # 记录日志到文件
-python -m report_eval report.json --log-file eval.log
+python -m report_eval examples/600519.SH.html --log-file eval.log
 ```
 
-## 研报 JSON 格式
-
-输入文件需符合以下结构：
-
-```json
-{
-  "meta": {
-    "asset_code": "600519.SH",
-    "asset_name": "贵州茅台",
-    "report_date": "2026-05-20"
-  },
-  "cards": [
-    {
-      "title": "Header",
-      "html": "<div>...</div>",
-      "card_id": "card_header_1"
-    },
-    {
-      "title": "基本面分析",
-      "html": "<div>...</div>"
-    }
-  ]
-}
-```
+HTML 文件命名格式为 `{股票代码}.html`（如 `600519.SH.html`），程序会自动从文件名提取股票代码，从 HTML 内容中提取股票名称。
 
 ## 输出格式
 
@@ -163,7 +140,7 @@ report-eval/
 │   ├── data_comparator.py   # 数值对比 + 公式复算
 │   ├── evaluator.py         # 评测引擎
 │   └── rubric.py            # 评分标准配置
-├── examples/                # 示例研报 JSON
+├── examples/                # 示例研报 HTML
 ├── output/                  # 默认输出目录
 ├── config.example.yaml      # 配置模板
 ├── requirements.txt

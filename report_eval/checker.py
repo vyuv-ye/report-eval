@@ -2,17 +2,17 @@
 研报数据核验 + 评测主入口。
 
 使用方式：
-    # 检测本地 JSON 文件
-    python -m report_eval.checker report.json
+    # 检测本地 HTML 研报文件
+    python -m report_eval examples/600519.SH.html
 
     # 仅数据对比（跳过评测）
-    python -m report_eval.checker report.json --data-only
+    python -m report_eval examples/600519.SH.html --data-only
 
     # 全量对比（含公式复算、LLM 计算验证）
-    python -m report_eval.checker report.json --all-check
+    python -m report_eval examples/600519.SH.html --all-check
 
     # 指定输出目录
-    python -m report_eval.checker report.json -o ./output
+    python -m report_eval examples/600519.SH.html -o ./output
 """
 import json
 import os
@@ -26,6 +26,9 @@ from loguru import logger
 from report_eval.ths_fetcher import fetch_ths_full, flatten_ths_full, is_trading_hours, LINE_INDICATORS
 from report_eval.report_parser import (
     extract_fields_from_report_json,
+    extract_fields_from_html,
+    extract_meta_from_html,
+    parse_html_to_text,
     check_report_by_llm,
     extract_structured_fields,
     check_analysis_quality,
@@ -43,16 +46,16 @@ from report_eval.evaluator import ReportEvaluator, EvalResult, rule_check_compli
 
 
 def run_check(
-    json_path: str,
+    file_path: str,
     data_only: bool = False,
     all_check: bool = False,
     output_dir: str = None,
 ) -> dict:
     """
-    对本地研报 JSON 文件执行完整的数据核验 + 评测流程。
+    对本地研报文件（HTML 或 JSON）执行完整的数据核验 + 评测流程。
 
     Args:
-        json_path: 研报 JSON 文件路径
+        file_path: 研报文件路径（支持 .html 和 .json）
         data_only: 仅数据对比，跳过 LLM 评测
         all_check: 全量对比（含公式复算、LLM 计算验证）
         output_dir: 结果输出目录
@@ -60,18 +63,26 @@ def run_check(
     Returns:
         包含检测和评测结果的字典
     """
-    logger.info(f'读取研报: {json_path}')
-    with open(json_path, 'r', encoding='utf-8') as f:
-        raw_json = f.read()
+    logger.info(f'读取研报: {file_path}')
+    with open(file_path, 'r', encoding='utf-8') as f:
+        raw_content = f.read()
 
-    data = json.loads(raw_json)
-    meta = data.get('meta', {})
-    ts_code = meta.get('asset_code', '')
-    asset_name = meta.get('asset_name', '')
+    is_html = file_path.lower().endswith(('.html', '.htm'))
+
+    if is_html:
+        filename = os.path.basename(file_path)
+        meta = extract_meta_from_html(raw_content, filename)
+        ts_code = meta.get('asset_code', '')
+        asset_name = meta.get('asset_name', '')
+    else:
+        data = json.loads(raw_content)
+        meta = data.get('meta', {})
+        ts_code = meta.get('asset_code', '')
+        asset_name = meta.get('asset_name', '')
 
     if not ts_code:
-        logger.error('JSON 中缺少 meta.asset_code')
-        return {"error": "缺少 meta.asset_code"}
+        logger.error('无法获取 asset_code（JSON 中缺少 meta.asset_code 或 HTML 文件名不符合格式）')
+        return {"error": "缺少 asset_code"}
 
     logger.info(f'ts_code={ts_code} asset_name={asset_name}')
 
@@ -89,14 +100,20 @@ def run_check(
 
     # ── Step 2: 正则提取结构化字段 ──
     logger.info('[Step 2] 正则提取结构化字段...')
-    structured_fields = extract_fields_from_report_json(raw_json)
+    if is_html:
+        structured_fields = extract_fields_from_html(raw_content, meta)
+    else:
+        structured_fields = extract_fields_from_report_json(raw_content)
     logger.info(f'正则提取字段: {json.dumps(structured_fields, ensure_ascii=False)}')
 
     report_date = meta.get('report_date')
 
     # ── Step 2.5: LLM 分类提取指标 ──
     logger.info('[Step 2.5] LLM 分类提取指标...')
-    report_text = _parse_report_json_to_text(raw_json)
+    if is_html:
+        report_text = parse_html_to_text(raw_content)
+    else:
+        report_text = _parse_report_json_to_text(raw_content)
     llm_indicators = extract_indicators_by_category(report_text)
 
     # ── Step 2.6: 合并提取结果 ──
@@ -104,8 +121,12 @@ def run_check(
     logger.info(f'合并后字段: {len(merged_fields)} 个')
 
     # ── Step 2.7: 数据一致性检查 ──
-    cards_html = ' '.join(c.get('html', '') for c in data.get('cards', []))
-    full_text_for_check = _strip_html(cards_html) if cards_html else report_text
+    if is_html:
+        full_text_for_check = report_text
+    else:
+        data = json.loads(raw_content)
+        cards_html = ' '.join(c.get('html', '') for c in data.get('cards', []))
+        full_text_for_check = _strip_html(cards_html) if cards_html else report_text
     consistency_issues = check_data_consistency(full_text_for_check)
     if consistency_issues:
         logger.warning(f'数据一致性警告: {len(consistency_issues)} 个字段存在多个数值')
@@ -276,7 +297,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description='研报数据核验与评测工具')
-    parser.add_argument('json_file', type=str, help='研报 JSON 文件路径')
+    parser.add_argument('report_file', type=str, help='研报文件路径（支持 .html 和 .json）')
     parser.add_argument('--data-only', action='store_true', default=False,
                         help='仅数据对比，跳过 LLM 评测')
     parser.add_argument('--all-check', action='store_true', default=False,
@@ -291,12 +312,12 @@ def main():
     if args.log_file:
         logger.add(args.log_file, rotation="10 MB")
 
-    if not os.path.isfile(args.json_file):
-        logger.error(f'文件不存在: {args.json_file}')
+    if not os.path.isfile(args.report_file):
+        logger.error(f'文件不存在: {args.report_file}')
         sys.exit(1)
 
     run_check(
-        json_path=args.json_file,
+        file_path=args.report_file,
         data_only=args.data_only,
         all_check=args.all_check,
         output_dir=args.output,
