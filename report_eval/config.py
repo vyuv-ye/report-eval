@@ -44,22 +44,3 @@ def get_llm_config() -> dict:
         "max_tokens": int(os.environ.get("LLM_MAX_TOKENS", 0) or llm.get("max_tokens", 4096)),
         "timeout": int(os.environ.get("LLM_TIMEOUT", 0) or llm.get("timeout", 120)),
     }
-
-
-def get_proxy_config() -> dict:
-    cfg = load_config()
-    proxy = cfg.get("proxy", {})
-    enabled = os.environ.get("PROXY_ENABLED", str(proxy.get("enabled", False))).lower() in ("true", "1", "yes")
-    host = os.environ.get("PROXY_HOST") or proxy.get("host", "")
-    username = os.environ.get("PROXY_USERNAME") or proxy.get("username", "")
-    password = os.environ.get("PROXY_PASSWORD") or proxy.get("password", "")
-
-    proxies = None
-    if enabled and host:
-        if username and password:
-            proxy_url = f"http://{username}:{password}@{host}/"
-        else:
-            proxy_url = f"http://{host}/"
-        proxies = {"http": proxy_url, "https": proxy_url}
-
-    return {"enabled": enabled, "proxies": proxies}

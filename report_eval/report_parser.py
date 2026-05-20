@@ -11,7 +11,6 @@ from typing import Dict, List, Optional
 from loguru import logger
 
 from report_eval.llm_client import get_llm_client
-from report_eval.http_utils import get_file_content_from_url
 
 # ── LLM Prompts ──
 
@@ -483,21 +482,6 @@ def extract_fields_from_report_json(json_str: str) -> dict:
         fields['dividend_yield'] = _safe_float(m.group(1))
 
     return fields
-
-
-# ── 对外接口 ──
-
-def download_report_text(report_json_url: str) -> Optional[str]:
-    """下载 report_json_url 并转为纯文本。"""
-    content = get_file_content_from_url(report_json_url)
-    if not content:
-        return None
-    return _parse_report_json_to_text(content)
-
-
-def download_report_raw(report_json_url: str) -> Optional[str]:
-    """下载 report_json_url，返回原始 JSON 字符串。"""
-    return get_file_content_from_url(report_json_url)
 
 
 def check_report_by_llm(

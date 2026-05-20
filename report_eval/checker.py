@@ -2,7 +2,7 @@
 研报数据核验 + 评测主入口。
 
 使用方式：
-    # 检测本地 HTML 研报文件
+    # 检测本地 HTML 研报文件（自动从 compare_json/ 加载标准数据）
     python -m report_eval examples/600519.SH.html
 
     # 仅数据对比（跳过评测）
@@ -23,7 +23,6 @@ from typing import Dict, List, Optional
 
 from loguru import logger
 
-from report_eval.ths_fetcher import fetch_ths_full, flatten_ths_full, is_trading_hours, LINE_INDICATORS
 from report_eval.report_parser import (
     extract_fields_from_report_json,
     extract_fields_from_html,
@@ -41,8 +40,21 @@ from report_eval.report_parser import (
 from report_eval.data_comparator import (
     verify_calculated_indicators,
     check_data_consistency,
+    flatten_standard_data,
 )
 from report_eval.evaluator import ReportEvaluator, EvalResult, rule_check_compliance, rule_check_analysis_quality
+
+COMPARE_JSON_DIR = Path(__file__).parent.parent / "compare_json"
+
+
+def _load_standard_data(ts_code: str) -> dict:
+    """从 compare_json/ 目录加载标准数据 JSON。"""
+    json_path = COMPARE_JSON_DIR / f"{ts_code}.json"
+    if not json_path.exists():
+        logger.warning(f'标准数据文件不存在: {json_path}')
+        return {}
+    with open(json_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
 
 def run_check(
@@ -86,17 +98,11 @@ def run_check(
 
     logger.info(f'ts_code={ts_code} asset_name={asset_name}')
 
-    # ── Step 1: 爬取标准数据 ──
-    logger.info('[Step 1] 爬取同花顺标准数据...')
-    ths_full = fetch_ths_full(ts_code)
-    ths_data = flatten_ths_full(ths_full)
-
-    trading = is_trading_hours()
-    if trading:
-        ths_data = {k: v for k, v in ths_data.items() if k not in LINE_INDICATORS}
-
-    merged_standard = dict(ths_data) if ths_data else {}
-    logger.info(f'标准数据共 {len(merged_standard)} 个指标')
+    # ── Step 1: 加载标准数据 ──
+    logger.info('[Step 1] 加载标准数据...')
+    standard_full = _load_standard_data(ts_code)
+    standard_flat = flatten_standard_data(standard_full) if standard_full else {}
+    logger.info(f'标准数据共 {len(standard_flat)} 个指标')
 
     # ── Step 2: 正则提取结构化字段 ──
     logger.info('[Step 2] 正则提取结构化字段...')
@@ -134,17 +140,17 @@ def run_check(
     # ── Step 3: LLM 事实指标对比 ──
     logger.info('[Step 3] LLM 事实指标对比...')
     check_results = []
-    if merged_standard:
-        check_results = check_report_by_llm(report_text, merged_standard, report_date=report_date) or []
+    if standard_flat:
+        check_results = check_report_by_llm(report_text, standard_flat, report_date=report_date) or []
 
     # ── Step 3.5: LLM 计算验证 ──
     calc_verify_results = []
     if all_check:
         logger.info('[Step 3.5] LLM 计算验证...')
         calculation_indicators = llm_indicators.get("calculation", [])
-        if calculation_indicators and merged_standard:
+        if calculation_indicators and standard_flat:
             calc_verify_results = verify_calculations_by_llm(
-                report_text, merged_standard, calculation_indicators
+                report_text, standard_flat, calculation_indicators
             )
             logger.info(f'LLM计算验证: {len(calc_verify_results)} 条')
 
@@ -179,8 +185,8 @@ def run_check(
             'report_value': item.get('report_value'),
             'standard_value': item.get('standard_value'),
             'is_match': 1 if result_str == 'correct' else 0,
-            'data_source': 'ths',
-            'ths_value': _fuzzy_get(ths_data, item.get('indicator')),
+            'data_source': 'compare_json',
+            'standard_ref': _fuzzy_get(standard_flat, item.get('indicator')),
         })
 
     for item in calc_results:
@@ -190,7 +196,6 @@ def run_check(
             'standard_value': item['standard_value'],
             'is_match': item['is_match'],
             'data_source': item.get('data_source', 'formula'),
-            'ths_value': None,
         })
 
     for item in calc_verify_results:
@@ -203,7 +208,6 @@ def run_check(
             'standard_value': item.get('recalculated_value'),
             'is_match': 1 if result_str == 'correct' else 0,
             'data_source': 'llm_calculation_verify',
-            'ths_value': None,
         })
 
     correct_cnt = sum(1 for r in all_results if r['is_match'] == 1)
@@ -267,7 +271,7 @@ def run_check(
             structured_fields=final_fields,
             analysis_quality=analysis_quality,
             compliance=compliance,
-            ths_full_data=ths_full,
+            standard_full_data=standard_full,
         )
 
         output["eval"] = eval_result.to_dict()

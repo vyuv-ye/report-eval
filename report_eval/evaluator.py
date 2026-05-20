@@ -279,12 +279,12 @@ class ReportEvaluator:
         structured_fields: dict,
         analysis_quality: dict,
         compliance: dict,
-        ths_full_data: Optional[dict] = None,
+        standard_full_data: Optional[dict] = None,
     ) -> EvalResult:
         result = EvalResult()
 
         try:
-            result.dim1_fact = self._eval_fact_accuracy(check_results, ths_full_data)
+            result.dim1_fact = self._eval_fact_accuracy(check_results, standard_full_data)
         except Exception as e:
             logger.error(f"维度一评分失败: {e}\n{traceback.format_exc()}")
             result.dim1_fact = DimensionScore(name="事实数据", max_score=40, score=0)
@@ -322,7 +322,7 @@ class ReportEvaluator:
 
         return result
 
-    def _eval_fact_accuracy(self, check_results: List[dict], ths_full: Optional[dict]) -> DimensionScore:
+    def _eval_fact_accuracy(self, check_results: List[dict], standard_full: Optional[dict]) -> DimensionScore:
         dim = DimensionScore(name="事实数据", max_score=40)
         if not check_results:
             dim.add_issue("HIGH", "无指标数据可评测")
@@ -338,10 +338,10 @@ class ReportEvaluator:
         accuracy_score = round(accuracy * 18, 2)
 
         time_score = 9.0
-        if ths_full:
-            if not ths_full.get("real_line_trend"):
+        if standard_full:
+            if not standard_full.get("real_line_trend"):
                 time_score -= 3
-            if not ths_full.get("factor"):
+            if not standard_full.get("factor"):
                 time_score -= 2
 
         consistency_score = 8.0

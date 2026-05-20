@@ -1,8 +1,75 @@
 """
-数值对比模块：公式复算、risk_reward 比对、数据一致性检查。
+数值对比模块：标准数据解析、公式复算、risk_reward 比对、数据一致性检查。
 """
 import re
 from typing import Dict, List, Optional
+
+
+def convert_chinese_number(value) -> Optional[float]:
+    """将带中文单位的数字字符串转换为 float。"""
+    if value is None or value == "":
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    value = str(value).strip()
+    if value.endswith("%"):
+        value = value[:-1]
+    units = {
+        "万亿": 1e12, "千亿": 1e11, "百亿": 1e10, "十亿": 1e9,
+        "亿": 1e8, "千万": 1e7, "百万": 1e6, "十万": 1e5,
+        "万": 1e4, "千": 1e3, "百": 1e2, "十": 1e1,
+    }
+    for unit, multiplier in sorted(units.items(), key=lambda x: -len(x[0])):
+        if value.endswith(unit):
+            num_part = value[:-len(unit)]
+            try:
+                return float(num_part) * multiplier
+            except ValueError:
+                return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def flatten_standard_data(standard_full: dict) -> dict:
+    """
+    从标准数据 JSON 中提取扁平 {指标中文名[报告期]: 数值} 字典。
+    每期数据的指标名带上报告期后缀，避免多期同名字段冲突。
+    """
+    if not standard_full:
+        return {}
+
+    flat = {}
+    _SKIP_KEYS = {
+        "科目\\时间", "时间\\科目", "科目\\时间(同比)", "报表核心指标", "报表全部指标",
+        "报表核心指标(同比)", "报表全部指标(同比)", "六、每股收益", "六、每股收益(同比)",
+        "报表年结日", "原始货币", "审计意见", "盈利指标", "资本结构", "每股指标",
+    }
+    for report in standard_full.get("report", []):
+        period = report.get("科目\\时间") or report.get("时间\\科目") or ""
+        for k, v in report.items():
+            if v is None or v == '' or v is False:
+                continue
+            if k in _SKIP_KEYS:
+                continue
+            val = convert_chinese_number(v)
+            key = f"{k}[{period}]" if period else k
+            if val is not None:
+                flat[key] = val
+            elif isinstance(v, str) and v.strip():
+                flat[key] = v
+
+    for k, v in standard_full.get("real_line_trend", {}).items():
+        if v is None or v == '' or v is False:
+            continue
+        val = convert_chinese_number(v)
+        if val is not None:
+            flat[k] = val
+        elif isinstance(v, str) and v.strip():
+            flat[k] = v
+
+    return flat
 
 PERCENT_INDICATORS = {
     "毛利率", "净利率", "资产负债率", "净资产收益率", "总资产收益率", "总资产净利率",
